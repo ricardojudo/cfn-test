@@ -3,7 +3,7 @@ name: Lint CloudFormation Templates
 on: [push]
 
 jobs:
-  cloudformation-linter:
+  cloudformation-checks:
     runs-on: ubuntu-latest
 
     steps:
