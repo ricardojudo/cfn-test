@@ -1,0 +1,80 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'CT Customization Pipeline - Budget definition'
+Parameters:
+  pCreateAwsBudget:
+    Description: Create AWS Budget.
+    Default: true
+    Type: String
+    AllowedValues:
+    - true
+    - false
+    ConstraintDescription: Must be Payer Account.
+  pBudgetAlertEmailAddress:
+    Type: String
+    Description: Budget Notification Email Address
+    Default: ""
+  pBudgetSNSTopic:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: "/cfct/sns-topics/budget-notification"
+  pBudgetThresholdAmount:
+    Type: String
+    Description: Monthly Budget Threshold, in percentage 
+    Default: '90'
+  pBudgetForecastedThresholdAmount:
+    Type: String
+    Description: Monthly Budget Forecasted Threshold, in percentage 
+    Default: '115'
+  pBudgetAmount:
+    Type: String
+    Description: Monthly Budget Amount 
+    Default: '15'
+  pBudgetName:
+    Type: String
+    Description: Monthly Budget Name 
+    Default: 'Monthly Budget'
+
+Conditions:
+  cCreateBudget: !Equals 
+    - !Ref pCreateAwsBudget
+    - true
+  cSubscribeEmailAddress: !Not [!Equals [!Ref pBudgetAlertEmailAddress, ""]]
+
+Resources:
+  rBudget:
+    Type: AWS::Budgets::Budget
+    Condition: cCreateBudget
+    Properties:
+      Budget:
+        BudgetName: !Ref pBudgetName
+        BudgetLimit:
+          Amount: !Ref pBudgetAmount
+          Unit: 'USD'
+        TimeUnit: MONTHLY
+        BudgetType: COST
+      NotificationsWithSubscribers:
+        - Notification:
+            ComparisonOperator: GREATER_THAN
+            NotificationType: ACTUAL
+            Threshold: !Ref pBudgetThresholdAmount
+          Subscribers:
+            - Address: !Ref pBudgetSNSTopic
+              SubscriptionType: SNS
+            - !If
+              - cSubscribeEmailAddress
+              -
+                - Address: !Ref pBudgetAlertEmailAddress
+                  SubscriptionType: EMAIL
+              - !Ref "AWS::NoValue"
+        - Notification:
+            ComparisonOperator: GREATER_THAN
+            NotificationType: FORECASTED
+            Threshold: !Ref pBudgetForecastedThresholdAmount
+          Subscribers:
+            - Address: !Ref pBudgetSNSTopic
+              SubscriptionType: SNS
+            - !If
+              - cSubscribeEmailAddress
+              -
+                - Address: !Ref pBudgetAlertEmailAddress
+                  SubscriptionType: EMAIL
+              - !Ref "AWS::NoValue"
