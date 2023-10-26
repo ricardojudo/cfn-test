@@ -38,7 +38,7 @@ Conditions:
     - !Ref pCreateAwsBudget
     - true
   cSubscribeEmailAddress: !Not [!Equals [!Ref pBudgetAlertEmailAddress, ""]]
-a 
+
 Resources:
   rBudget:
     Type: AWS::Budgets::Budget

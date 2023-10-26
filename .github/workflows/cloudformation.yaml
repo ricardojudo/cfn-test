@@ -17,3 +17,8 @@ jobs:
         run: |
           cfn-lint --version
           cfn-lint -I templates/*.yaml
+
+      - name: Run CFN Nag to look for patterns that may indicate insecure infrastructure
+        uses: stelligent/cfn_nag@master
+        with:
+          input_path: templates/*    
