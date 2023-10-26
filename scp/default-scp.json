@@ -1,0 +1,116 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "PreventExternalPrincipalsRAMShare",
+            "Effect": "Deny",
+            "Action": [
+                "ram:CreateResourceShare",
+                "ram:UpdateResourceShare"
+            ],
+            "Resource": "*",
+            "Condition": {
+                "Bool": {
+                    "ram:RequestedAllowsExternalPrincipals": "true"
+                }
+            }
+        },
+        {
+            "Effect": "Deny",
+            "Action": [
+                "organizations:LeaveOrganization"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "DenyDeletionOfFlowLogs",
+            "Effect": "Deny",
+            "Action": [
+                "ec2:DeleteFlowLogs"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "DenyDeletionOfCWLogGroupsAndStreams",
+            "Effect": "Deny",
+            "Action": [
+                "logs:DeleteLogGroup",
+                "logs:DeleteLogStream"
+            ],
+            "Resource": "*",
+            "Condition": {
+                "ForAnyValue:StringNotEquals": {
+                    "aws:CalledVia": [
+                        "cloudformation.amazonaws.com"
+                    ]
+                }
+            }
+        },
+        {
+            "Sid": "DenyGuardDutyAdministrationOutOfDelegated",
+            "Effect": "Deny",
+            "Action": [
+                "guardduty:AcceptInvitation",
+                "guardduty:ArchiveFindings",
+                "guardduty:DeclineInvitations",
+                "guardduty:DeleteDetector",
+                "guardduty:DeleteFilter",
+                "guardduty:DeleteInvitations",
+                "guardduty:DeleteIPSet",
+                "guardduty:DeleteMembers",
+                "guardduty:DeletePublishingDestination",
+                "guardduty:DeleteThreatIntelSet",
+                "guardduty:DisassociateFromMasterAccount",
+                "guardduty:DisassociateMembers",
+                "guardduty:InviteMembers",
+                "guardduty:StartMonitoringMembers",
+                "guardduty:StopMonitoringMembers",
+                "guardduty:UnarchiveFindings",
+                "guardduty:UntagResource",
+                "guardduty:UpdateDetector",
+                "guardduty:UpdateFilter",
+                "guardduty:UpdateFindingsFeedback",
+                "guardduty:UpdateIPSet",
+                "guardduty:UpdatePublishingDestination",
+                "guardduty:UpdateThreatIntelSet"
+            ],
+            "Resource": "*",
+            "Condition": {
+                "ArnNotLike": {
+                    "aws:PrincipalARN": "arn:aws:iam::*:role/AWSControlTowerExecution*"
+                }
+            }
+        },
+        {
+            "Sid": "DenyCloudtrailManagement",
+            "Effect": "Deny",
+            "Action": [
+                "cloudtrail:UpdateTrail",
+                "cloudtrail:DeleteTrail",
+                "cloudtrail:StopLogging"
+            ],
+            "Resource": "*",
+            "Condition": {
+                "ArnNotLike": {
+                    "aws:PrincipalARN": "arn:aws:iam::*:role/AWSControlTowerExecution*"
+                }
+            }
+        },
+        {
+            "Sid": "DenyDeletionOfConfigResources",
+            "Effect": "Deny",
+            "Action": [
+                "config:DeleteConfigRule",
+                "config:DeleteConfigurationRecorder",
+                "config:DeleteDeliveryChannel",
+                "config:StopConfigurationRecorder"
+            ],
+            "Resource": "*",
+            "Condition": {
+                "ArnNotLike": {
+                    "aws:PrincipalARN": "arn:aws:iam::*:role/AWSControlTowerExecution*"
+                }
+            }
+        }
+    ]
+}
